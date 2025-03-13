@@ -1,0 +1,70 @@
+
+services:
+
+  db:
+    container_name: postgres_container_nextcloud
+    image: postgres:14.3-alpine
+    command:
+      - "postgres"
+      - "-c"
+      - "shared_preload_libraries=pg_stat_statements"
+      - "-c"
+      - "pg_stat_statements.max=10000"
+      - "-c"
+      - "pg_stat_statements.track=all"
+    restart: always
+    environment:
+      POSTGRES_DB: "postgres"
+      POSTGRES_USER: "postgres"
+      POSTGRES_PASSWORD: "postgres"
+      PGDATA: "/var/lib/postgresql/data/pgdata"
+    # volumes:
+    #  - ./2. Init Database:/docker-entrypoint-initdb.d
+    #  - .:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    deploy:
+      resources:
+        limits:
+          cpus: '1'
+          memory: 4G
+    networks:
+      - postgres
+
+  nextcloud:
+    build: .
+    restart: always
+    ports:
+      - "9000:80"
+    depends_on:
+      - db
+    links:
+      - db
+    networks:
+      - postgres
+    environment:
+      - NEXTCLOUD_TRUSTED_DOMAINS="172.30.64.183"
+      - POSTGRES_DB=postgres
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_HOST=db:5432
+    volumes:
+      - ./nextcloud_share:/var/www/html/data
+
+
+networks:
+  postgres:
+    driver: bridge
+
+  default:
+    external: true
+    name: custom_network
+
+volumes:
+  nextcloud_share:

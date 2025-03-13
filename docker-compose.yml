@@ -1,0 +1,156 @@
+services:
+  dozzle:
+    container_name: dozzle
+    image: amir20/dozzle:latest
+    restart: always
+    volumes:
+     - /var/run/docker.sock:/var/run/docker.sock
+    ports:
+      - 8081:8080
+    
+  db_backend:
+    container_name: postgres_container
+    image: postgres:14.1-alpine
+    volumes:
+      - ./database/init.sql:/docker-entrypoint-initdb.d/init.sql
+    restart: always
+    environment:
+      POSTGRES_DB: "postgres"
+      POSTGRES_USER: "postgres"
+      POSTGRES_PASSWORD: "postgres"
+      PGDATA: "/var/lib/postgresql/data/pgdata"
+    ports:
+      - "5433:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    deploy:
+      resources:
+        limits:
+          cpus: '1'
+          memory: 4G
+    networks:
+      - postgres
+
+  postgres_exporter:
+    container_name: exporter_container
+    image: prometheuscommunity/postgres-exporter:v0.10.0
+    environment:
+      DATA_SOURCE_URI: "db:5432/postgres?sslmode=disable"
+      DATA_SOURCE_USER: "postgres"
+      DATA_SOURCE_PASS: "postgres"
+      PG_EXPORTER_EXTEND_QUERY_PATH: "/etc/postgres_exporter/queries.yaml"
+    ports:
+      - "9187:9187"
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          cpus: '0.2'
+          memory: 500M
+    networks:
+      - postgres
+
+  backend:
+    build: ./geo_ai_backend
+    command: bash -c "alembic upgrade head && uvicorn main:app --host=0.0.0.0 --port=8090 --ssl-keyfile=key.pem --ssl-certfile=certificate.pem"
+    volumes:
+      - ./geo_ai_backend/static:/geo_ai_backend/static
+      - ./nextcloud/nextcloud_share:/geo_ai_backend/static/nextcloud
+      - ./ml_models/HAT/inference/models_inference:/geo_ai_backend/static/models
+    ports:
+      - "8090:8090"
+    networks:
+      - postgres
+    restart: always
+    depends_on:
+      - db_backend
+      - postgres_exporter
+      - triton_server
+
+  redis:
+    image: redis:latest
+    restart: always
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 1s
+      timeout: 2s
+      retries: 10
+    networks:
+      - postgres
+
+  worker:
+    container_name: worker
+    build: ./geo_ai_backend
+    command: celery -A geo_ai_backend.worker.celery worker --concurrency=8
+    volumes:
+      - ./geo_ai_backend/static:/geo_ai_backend/static
+      - ./nextcloud/nextcloud_share:/geo_ai_backend/static/nextcloud
+      - ./ml_models/HAT/inference/models_inference:/geo_ai_backend/static/models
+    depends_on:
+      - backend
+      - redis
+    links:
+      - redis
+    environment:
+      - CELERY_BROKER_URL=redis://redis:6379/0
+      - CELERY_RESULT_BACKEND=redis://redis:6379/0
+    restart: always
+    networks:
+      - postgres
+
+  react-app-prod:
+    build: ./geo_ai_frontend
+    ports:
+      - "443:443"
+    environment:
+      - NODE_OPTIONS=--max-old-space-size=4096
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf
+      - ./nginx/nginx.prod.conf:/etc/nginx/conf.d/default.conf
+      - ./nginx/certificate.pem:/etc/nginx/certificate.pem
+      - ./nginx/key.pem:/etc/nginx/key.pem
+    restart: always
+    command: ["nginx", "-g", "daemon off;"]
+    depends_on:
+      - db_backend
+      - postgres_exporter
+      - backend
+    networks:
+      - postgres
+
+  triton_server:
+    image: nvcr.io/nvidia/tritonserver:23.07-py3
+    command: bash -c "pip3 install easyocr==1.7.1 && pip3 install numpy==1.23.5 && tritonserver --model-repository=/models --model-control-mode=explicit"
+    ports:
+      - "8010:8000"
+      - "8011:8001"
+      - "8012:8002"
+    volumes:
+      - ./ml_models/HAT/inference/models_inference:/models
+    networks:
+      - postgres
+    environment:
+      - PYTHONIOENCODING=utf-8
+    shm_size: "2g"
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [ gpu ]
+    container_name: triton_server
+    restart: unless-stopped
+
+
+networks:
+  postgres:
+    driver: bridge
+
+volumes:
+  nextcloud_nextcloud_share:
+    external: true

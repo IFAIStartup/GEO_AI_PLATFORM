@@ -1,0 +1,5 @@
+VITE_SERVER_URL=https://172.30.64.183:8090
+VITE_ARCGIS_PORTAL_URL=https://www.arcgis.com
+VITE_NEXTCLOUD_URL=http://172.30.64.183:9000/apps/files?dir=/&fileid=2
+VITE_DOZZLE_URL=http:172.30.64.183:8081
+VITE_CVAT_URL=https://cvat-srv.compvisionsys.com

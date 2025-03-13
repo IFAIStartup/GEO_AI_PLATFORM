@@ -1,0 +1,22 @@
+# postgre
+pgdata
+pgadmin
+2. Init Database
+queries.yaml
+
+# rep
+geo_ai_backend
+geo_ai_frontend
+
+# ide
+.idea
+.vscode
+
+# ml models
+ml_models/HAT/inference/models_inference
+
+# nextcloud
+nextcloud/nextcloud_share
+
+# Mac OS
+.DS_Store

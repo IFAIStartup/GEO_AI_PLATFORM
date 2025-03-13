@@ -1,0 +1,80 @@
+[RUN]
+HOST = "0.0.0.0"
+API_HOST="172.30.64.183"
+EXTERNAL_HOST="94.201.39.190"
+PORT = 8090
+LOG_LEVEL = "debug"
+RELOAD = True
+DEBUG = True
+HTTPS_ON = True
+
+[DB]
+# docker
+DATABASE_URL = "postgresql+psycopg2://postgres:postgres@db_backend:5432/postgres"
+# local, without start backend
+# DATABASE_URL = "postgresql+psycopg2://postgres:postgres@localhost:5433/postgres"
+
+[EMAIL]
+MAIL_USERNAME = ifaistartup@gmail.com
+MAIL_PASSWORD = "lyvh kwif afer bqdh"
+MAIL_FROM = ifaistartup@gmail.com
+MAIL_PORT = 587
+MAIL_SERVER = smtp.gmail.com
+MAIL_FROM_NAME =Innovation-floor
+
+
+[TOKEN]
+ACCESS_TOKEN_EXPIRE_MINUTES=180
+REFRESH_TOKEN_EXPIRE_MINUTES=180
+JWT_SECRET_KEY=w2x%e=xy!7i$5m-3nbv^98*sj=u@ylnqi07zjtw$umb67$@-ze
+JWT_REFRESH_SECRET_KEY=zf*&g#6#d9k(w^7(el6or2_ue@tf7ir+n2gh9t4q@rqasj0o&w
+ALGORITHM = HS256
+
+[NEXTCLOUD]
+URL_NEXTCLOUD = "http://172.30.64.183:9000"
+LOGIN_NEXTCLOUD="Admin123"
+PASSWORD_NEXTCLOUD="Work@123"
+URL_DOWNLOAD_NEXTCLOUD = "/index.php/apps/files/ajax/download.php?dir="
+
+[REDIS]
+BROKER_URL=redis://redis
+BROKER_PORT=6379
+RESULT_BACKEND=redis://redis
+RESULT_BACKEND_PORT=6379
+RESULT_EXTENDED=True
+
+[WORKER]
+WORKER_PORT=8090
+
+[TRITON]
+TRITON_PORT=8010
+
+[AD]
+LDAP_DOMAIN=am\
+LDAP_SERVER=ldap://am.ae
+LDAP_ON=False
+
+[ARCGIS]
+ARCGIS_URL=https://www.arcgis.com
+ARCGIS_LOGIN="Ibrahim.Alobaidly"
+ARCGIS_PASSWORD="myinnovation2000"
+ARCGIS_VERIFY_CERT=False
+ARCGIS_OVERWRITE=True
+CLIENT_HOST=https://172.30.64.183
+ACCESS_ARCGIS_TOKEN_EXPIRE_MINUTES=60
+ARCGIS_PATH="/sharing/rest/generateToken"
+
+[MLFLOW]
+MLFLOW_ON=False
+URL_MLFLOW="http://172.30.64.183"
+PROT_MLFLOW=7181
+LOGIN_MLFLOW="airflow"
+PASSWORD_MLFLOW="airflow"
+
+[ENGINE]
+POOL_SIZE_ENGINE = 10000
+
+[ML_SERVER]
+ML_SERVER_URL = "http://172.30.64.183"
+ML_SERVER_PORT = "7181"
+ML_MLFLOW_PORT = "5000"
