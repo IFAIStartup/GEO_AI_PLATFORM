@@ -1,0 +1,12 @@
+@import "https://js.arcgis.com/4.27/@arcgis/core/assets/esri/themes/light/main.css";
+
+html,
+body,
+#root {
+  height: 100%;
+}
+
+.esri-basemap-toggle {
+  margin-right: 23px;
+  margin-top: -27px;
+}

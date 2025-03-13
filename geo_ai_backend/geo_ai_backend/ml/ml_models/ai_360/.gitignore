@@ -1,0 +1,6 @@
+model_repository
+model_repository_disabled
+Dockerfile
+setup_triton.sh
+inputs
+outs

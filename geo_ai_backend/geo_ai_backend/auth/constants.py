@@ -1,0 +1,9 @@
+from geo_ai_backend.config import settings
+
+ACCESS_TOKEN_EXPIRE_MINUTES = settings.ACCESS_TOKEN_EXPIRE_MINUTES  # 30 minutes
+REFRESH_TOKEN_EXPIRE_MINUTES = (
+    settings.REFRESH_TOKEN_EXPIRE_MINUTES
+)  # minutes / 60 * 24 * 7  # 7 days
+ALGORITHM = settings.ALGORITHM
+JWT_SECRET_KEY = settings.JWT_SECRET_KEY
+JWT_REFRESH_SECRET_KEY = settings.JWT_REFRESH_SECRET_KEY

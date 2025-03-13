@@ -1,0 +1,41 @@
+default_stages: [commit]
+
+repos:
+-   repo: local
+    hooks:
+    -   id: isort
+        name: Running isort
+        entry: isort
+        language: system
+        files: .*.py
+        args: ["--profile", "black"]
+        exclude: '^(.*pyproject\.toml|migrations\/.*)$'
+    -   id: black
+        name: Running black
+        entry: black
+        exclude: '^(.*pyproject\.toml|migrations\/.*)$'
+        language: system
+        files: .*.py
+    -   id: flake8
+        name: Running flake8
+        entry: flake8 --count
+        language: system
+        files: .*.py
+        exclude: '^(.*pyproject\.toml|migrations\/.*)$'
+    -   id: mypy
+        name: Running mypy
+        entry: mypy
+        language: system
+        files: .*.py
+        exclude: '^(.*pyproject\.toml|.*tests\/.*|migrations\/.*)$'
+    -   id: pytest
+        name: Running project's pytest
+        entry: pytest tests
+        language: system
+        always_run: false
+        pass_filenames: false
+    -   id: commitizen
+        name: Running commitizen
+        entry: cz check --commit-msg-file
+        language: system
+        stages: [commit-msg]

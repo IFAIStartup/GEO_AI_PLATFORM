@@ -4,9 +4,6 @@ pgadmin
 2. Init Database
 queries.yaml
 
-# rep
-geo_ai_backend
-geo_ai_frontend
 
 # ide
 .idea
